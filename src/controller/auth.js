@@ -48,8 +48,9 @@ auth.signIn = async (req, res) => {
       email,
       roles_id: data.roles_id
     };
+
     const jwtOptions = {
-      issuer: process.env.JWT_ISSUER,
+      issuer: process.env.JWT_ISSUER ,
       expiresIn: "12h", // expired in 10000s
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptions);

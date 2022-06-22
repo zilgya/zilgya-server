@@ -10,7 +10,7 @@ const cloudinaryConfig = require("./src/middlewares/cloudinary");
 
 dbConn();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 const originList = ["http://localhost:3000", "::1"];
 

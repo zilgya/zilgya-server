@@ -16,7 +16,7 @@ const limit = {
 
 const imageFilter = (req, file, cb) => {
   const extName = path.extname(file.originalname);
-  const allowedExt = /jpg|jpeg|png/;
+  const allowedExt = /jpg|jpeg|png|JPG|JPEG|PNG/;
   if (!allowedExt.test(extName))
     return cb(new Error("Image should be .jpg, .jpeg, or .png"), false);
   cb(null, true);
