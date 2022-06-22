@@ -2,6 +2,7 @@ const Router = require("express").Router();
 const userRouter = require('./user')
 
 const authRouter = require("./auth");
+const productRoutes = require("./product");
 
 Router.get("/", (_req, res) => {
   res.json({
@@ -10,7 +11,7 @@ Router.get("/", (_req, res) => {
 });
 Router.use("/auth", authRouter);
 Router.use("/user", userRouter);
-// Router.use("/product");
+Router.use("/product",productRoutes);
 // Router.use("/transaction");
 Router.get("*", (_req, res) => {
   res.status(404).json({
