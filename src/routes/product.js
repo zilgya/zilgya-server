@@ -1,6 +1,7 @@
 const Router = require("express").Router();
 
-Router.post('/')
+const productController = require("../controller/product");
+// Router.post('/')
+Router.get("/", productController.findProductByQuery);
 
-
-module.exports = Router
+module.exports = Router;
