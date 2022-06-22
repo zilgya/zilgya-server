@@ -50,7 +50,7 @@ const getAllTransactionsfromUsers = (id) => {
 
 const getAllTransactionsfromSeller = (id) => {
     return new Promise((resolve, reject) => {
-        const sqlQuery = "select transactions.sub_total, transactions.created_at, users.username from transactions join users on transactions.users_id = users.id where transactions.users_id = $1 order by created_at asc";
+        const sqlQuery = "select images.url, products.name as name_product, products.price, transaction_products.quantity, transactions.order_status, transactions.total_price from products join images on products.id  = images.product_id join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id" ;
         db.query(sqlQuery, [id])
             .then((result) => {
                 //console.log(result)
@@ -69,4 +69,5 @@ const getAllTransactionsfromSeller = (id) => {
 module.exports = {
     createNewTransactions,
     getAllTransactionsfromUsers,
+    getAllTransactionsfromSeller,
 }

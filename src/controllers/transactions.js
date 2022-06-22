@@ -1,5 +1,5 @@
 const transactionsModel = require("../models/transactions");
-const { createNewTransactions, getAllTransactionsfromUsers } = transactionsModel;
+const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfromSeller } = transactionsModel;
 // const { successResponse, errorResponse } = require("../helpers/response");
 // const { status } = require("express/lib/response");
 
@@ -52,8 +52,25 @@ const getAllTransactionsUser = (req, res) => {
             });
         });
 }
+const getAllTransactionsSeller = (req, res) => {
+    const id = req.userPayload.id;
+    getAllTransactionsfromSeller(id)
+        .then((data) => {
+            res.status(200).json({
+                err: null,
+                data,
+            });
+        })
+        .catch(({status, err}) => {
+            res.status(status).json({
+                err,
+                data: [],
+            });
+        });
+}
 
 module.exports = { 
     postNewTransactions,
-    getAllTransactionsUser
+    getAllTransactionsUser,
+    getAllTransactionsSeller
 }
