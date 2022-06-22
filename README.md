@@ -90,5 +90,5 @@ $ npm run startDev
 
 ### Related Project
 
-- [`Frontend-juncoffee`](https://github.com/achmadrasidi/juncoffee-client)
-- [`Backend-juncoffee`](https://github.com/achmadrasidi/juncoffee-server)
+- [`Frontend-zilgya`](https://github.com/zilgya/zilgya-client)
+- [`Backend-zilgya`](https://github.com/zilgya/zilgya-server)
