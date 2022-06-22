@@ -1,11 +1,12 @@
 const Router = require("express").Router();
 const userController = require("../controller/user");
+const {checkToken} =require('../middlewares/auth')
+const imageUpload =require('../middlewares/upload')
 
-// Masih butuh check token sama multer
 
 
 //Router User
-Router.get("/", userController.getUserInfo); 
-Router.patch("/", userController.patchUserInfo);
+Router.get("/",checkToken, userController.getUserInfo); 
+Router.patch("/",checkToken, imageUpload.single("photo"), userController.patchUserInfo);
 
 module.exports = Router;

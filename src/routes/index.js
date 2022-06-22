@@ -1,12 +1,14 @@
 const Router = require("express").Router();
 const userRouter = require('./user')
 
+const authRouter = require("./auth");
+
 Router.get("/", (_req, res) => {
   res.json({
     message: "This is Zilgya API",
   });
 });
-// Router.use("/auth");
+Router.use("/auth", authRouter);
 Router.use("/user", userRouter);
 // Router.use("/product");
 // Router.use("/transaction");
