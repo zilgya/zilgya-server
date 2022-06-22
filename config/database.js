@@ -8,4 +8,13 @@ const db = new Pool({
   },
 });
 
-module.exports = db;
+const dbConn = async () => {
+  try {
+    await db.connect();
+    console.log("DB connected");
+  } catch (err) {
+    console.log(`Error: ${err.message}`);
+  }
+};
+
+module.exports = { db, dbConn };

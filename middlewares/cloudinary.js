@@ -1,6 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 
-const cloudinaryConfig = (req, res, next) => {
+const cloudinaryConfig = (_req, _res, next) => {
   cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUD_API_KEY,

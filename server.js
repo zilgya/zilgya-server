@@ -3,10 +3,10 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 
-const mainRouter = require("./src/routes/index.js");
-const { dbConn } = require("./src/config/db.js");
+const mainRouter = require("./routes/index.js");
+const { dbConn } = require("./config/database.js");
 
-const { cloudConfig } = require("./src/config/cloudinary");
+const cloudinaryConfig = require("./middlewares/cloudinary");
 
 dbConn();
 const app = express();
@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("*", cloudConfig);
+app.use("*", cloudinaryConfig);
 
 app.use(mainRouter);
 
