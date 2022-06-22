@@ -1,6 +1,6 @@
 const Router = require("express").Router();
 
-const authController = require("../controller/auth");
+const authController = require("../controllers/auth");
 const { checkDuplicate } = require("../middlewares/auth");
 // const validate = require("../middlewares/users_validate");
 
