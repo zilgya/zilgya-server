@@ -3,10 +3,10 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 
-const mainRouter = require("./routes/index.js");
-const { dbConn } = require("./config/database.js");
+const mainRouter = require("./src/routes/index");
+const { dbConn } = require("./src/config/database.js");
 
-const cloudinaryConfig = require("./middlewares/cloudinary");
+const cloudinaryConfig = require("./src/middlewares/cloudinary");
 
 dbConn();
 const app = express();
