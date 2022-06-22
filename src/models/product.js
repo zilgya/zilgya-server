@@ -1,6 +1,6 @@
 const { db } = require("../config/database");
 
-const getProducts = (query) => {
+const getProducts = (query, route) => {
   return new Promise((resolve, reject) => {
     const {
       find,
@@ -11,11 +11,51 @@ const getProducts = (query) => {
       limit = 12,
     } = query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
+    let totalParam = [];
+    let arr = [];
     let totalQuery =
       "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id";
     let sqlQuery =
       "SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category,  u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id";
-    db.query(sqlQuery)
+    if (!find && !categories) {
+      sqlQuery += " order by " + sort + " " + order + " LIMIT $1 OFFSET $2";
+      arr.push(parseInt(limit), offset);
+    }
+    if (find && !categories) {
+      sqlQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $2 OFFSET $3";
+      totalQuery += " where lower(p.name) like lower('%' || $1 || '%')";
+      arr.push(find, parseInt(limit), offset);
+      totalParam.push(find);
+    }
+    if (categories && !find) {
+      sqlQuery +=
+        " where lower(c.name) = lower($1) order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $2 OFFSET $3";
+      totalQuery += " where lower(c.name) = lower($1)";
+      arr.push(categories, Number(limit), offset);
+      totalParam.push(categories);
+    }
+    if (find && categories) {
+      sqlQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $3 OFFSET $4";
+      totalQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
+      arr.push(find, categories, Number(limit), offset);
+      totalParam.push(find, categories);
+    }
+    db.query(sqlQuery, arr)
       .then((result) => {
         if (result.rows.length === 0) {
           return reject({ status: 404, err: "Product Not Found" });
@@ -24,7 +64,23 @@ const getProducts = (query) => {
           total: result.rowCount,
           data: result.rows,
         };
-        resolve(response);
+        db.query(totalQuery, totalParam)
+          .then((result) => {
+            response.totalData = Number(result.rows[0]["total_products"]);
+            response.totalPage = Math.ceil(response.totalData / Number(limit));
+            if (page < response.totalPage)
+              response.nextPage = `/product${route.path}?page=${
+                parseInt(page) + 1
+              }`;
+            if (offset > 0)
+              response.previousPage = `/product${route.path}?page=${
+                parseInt(page) - 1
+              }`;
+            resolve(response);
+          })
+          .catch((err) => {
+            reject({ status: 500, err });
+          });
       })
       .catch((err) => {
         reject({ status: 500, err });
