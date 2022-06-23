@@ -166,9 +166,9 @@ const deleteProduct = async (id) => {
   try {
     const sqlQuery = "UPDATE products set on_delete=true WHERE id = $1 RETURNING *";
 
-    const product = await db.query(sqlQuery, id);
+    const product = await db.query(sqlQuery, [id]);
     if (!product.rowCount) {
-      throw new ErrorHandler({ status: 404, message: "Product Not Foun" });
+      throw new ErrorHandler({ status: 404, message: "Product Not Found" });
     }
 
     return {
