@@ -1,10 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const { register, getPassByUserEmail } = require("../models/auth");
+const { register, getPassByUserEmail, verifyEmail } = require("../models/auth");
 const { successResponse, errorResponse } = require("../helpers/response");
 const { client } = require("../config/redis.js");
-const { removeAccess } = require("../middlewares/auth");
+const { sendConfirmationEmail } = require("../config/nodemailer");
 
 const auth = {};
 
@@ -14,16 +14,21 @@ auth.register = (req, res) => {
   const {
     body: { email, password, roles_id, created_at },
   } = req;
+
   bcrypt
     .hash(password, 10)
     .then((hashedPassword) => {
       register(email, hashedPassword, roles_id, created_at)
-        .then(() => {
-          successResponse(res, 201, { msg: "Register Success" }, null);
+        .then(async ({ data }) => {
+          const token = jwt.sign({ email: data.email }, process.env.JWT_SECRET_CONFIRM_KEY, { expiresIn: "1h" });
+          await client.set(`jwt${data.email}`, token);
+          await sendConfirmationEmail(data.email, data.email, token);
+          successResponse(res, 201, { msg: "Register Success, Please Check email for verification" }, null);
         })
         .catch((error) => {
+          console.log(error);
           const { status, err } = error;
-          errorResponse(res, status, err);
+          errorResponse(res, status ? status : 500, err);
         });
     })
     .catch((err) => {
@@ -40,6 +45,9 @@ auth.signIn = async (req, res) => {
     } = req;
     // cek kecocokan email dan pass di db
     const data = await getPassByUserEmail(email);
+    if (data.status !== "active") {
+      return errorResponse(res, 403, { msg: "Pending Account. Please Verify Your Email" });
+    }
     const result = await bcrypt.compare(password, data.password);
     if (!result) return errorResponse(res, 400, { msg: "Email or Password wrong !" });
     // generate jwt
@@ -72,6 +80,23 @@ auth.logout = async (req, res) => {
     successResponse(res, 200, { message: "You have successfully logged out" }, null);
   } catch (err) {
     errorResponse(res, 500, err.message);
+  }
+};
+
+auth.confirmEmail = async (req, res) => {
+  try {
+    const { email } = req.userPayload;
+    const data = await verifyEmail(email);
+
+    res.json({
+      data,
+      message: "Your Email has been verified. Please Login",
+    });
+  } catch (err) {
+    const status = err.status ? err.status : 500;
+    res.status(status).json({
+      error: err.message,
+    });
   }
 };
 

@@ -1,18 +1,10 @@
-const { db } = require("../config/database");
-
-const {
-  getProducts,
-  postProduct,
-  updateProduct,
-  deleteProduct,
-} = require("../models/product");
+const { getProducts, postProduct, updateProduct, deleteProduct, getProductImages } = require("../models/product");
 const { errorResponse } = require("../helpers/response");
 
 const findProductByQuery = (req, res) => {
   getProducts(req.query, req.route)
     .then((result) => {
-      const { data, total, totalData, totalPage, nextPage, previousPage } =
-        result;
+      const { data, total, totalData, totalPage, nextPage, previousPage } = result;
       const meta = {
         totalData,
         totalPage,
@@ -31,13 +23,28 @@ const findProductByQuery = (req, res) => {
     });
 };
 
+const getImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await getProductImages(id);
+    res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    const { message, status } = error;
+    res.status(status ? status : 500).json({
+      error: message,
+    });
+  }
+};
+
 const createProduct = async (req, res) => {
   try {
     let image = "";
     const { id } = req.userPayload;
     const { files } = req;
 
-    if (files.length) {
+    if (files) {
       image = files;
     }
 
@@ -65,12 +72,7 @@ const patchProduct = async (req, res) => {
       image = files;
     }
 
-    const { data, message } = await updateProduct(
-      req.body,
-      user_id,
-      product_id,
-      image
-    );
+    const { data, message } = await updateProduct(req.body, user_id, product_id, image);
     res.status(200).json({
       data,
       message,
@@ -104,4 +106,5 @@ module.exports = {
   removeProduct,
   patchProduct,
   findProductByQuery,
+  getImages,
 };

@@ -17,10 +17,10 @@ const sendConfirmationEmail = async (name, email, confirmationCode) => {
       from: process.env.MAIL_USERNAME,
       to: email,
       subject: "Please confirm your Account",
-      html: `<h2>Juncoffee Email Confirmation</h2>
+      html: `<h2>Zilgya Furniture Email Confirmation</h2>
       <h3>Hi, ${name}</h3>
-      <h3>Thank you for register. Please confirm your email by clicking on the following link:</h3>
-      <a href=${process.env.CLIENT_URL}/auth/confirm/${confirmationCode}> Click here to verify</a>
+      <h3>Thank you for register. Please confirm your email by clicking on the following link ${confirmationCode}:</h3>
+      <a href=${process.env.CLIENT_URL}/auth/confirm/${confirmationCode}> Click here to verify </a>
       </div>`,
     };
     await transport.sendMail(mailOptions);
