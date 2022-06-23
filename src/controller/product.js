@@ -1,7 +1,7 @@
 const { db } = require("../config/database");
 
-const { getProducts } = require("../models/product");
-const { successResponse, errorResponse } = require("../helpers/response");
+const { getProducts, postProduct } = require("../models/product");
+const { errorResponse } = require("../helpers/response");
 
 const findProductByQuery = (req, res) => {
   getProducts(req.query, req.route)
@@ -19,7 +19,6 @@ const findProductByQuery = (req, res) => {
         total,
         meta,
       });
-      //   successResponse(res, 200, data, total, totalData, totalPage);
     })
     .catch((error) => {
       const { err, status } = error;
@@ -27,6 +26,27 @@ const findProductByQuery = (req, res) => {
     });
 };
 
-module.exports = {
-  findProductByQuery,
+const createProduct = async (req, res) => {
+  try {
+    let image = "";
+    const { id } = req.userPayload;
+    const { files } = req;
+
+    if (files.length) {
+      image = files;
+    }
+
+    const { data, message } = await postProduct(req.body, image, id);
+    res.status(200).json({
+      data,
+      message,
+    });
+  } catch (error) {
+    const { message } = error;
+    res.status(500).json({
+      error: message,
+    });
+  }
 };
+
+module.exports = { createProduct, getProducts };
