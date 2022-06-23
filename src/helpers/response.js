@@ -9,7 +9,6 @@ response.successResponse = (res, status, data, total) => {
 };
 
 response.errorResponse = (res, status, err) => {
-  //console.log(status);
   res.status(status).json({
     err,
     data: [],
