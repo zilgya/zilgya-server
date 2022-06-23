@@ -2,6 +2,7 @@ const Router = require("express").Router();
 const userRouter = require('./user')
 
 const authRouter = require("./auth");
+const transactionsRouter = require("./transactions");
 const productRoutes = require("./product");
 
 Router.get("/", (_req, res) => {
@@ -12,7 +13,7 @@ Router.get("/", (_req, res) => {
 Router.use("/auth", authRouter);
 Router.use("/user", userRouter);
 Router.use("/product",productRoutes);
-// Router.use("/transaction");
+Router.use("/transactions", transactionsRouter);
 Router.get("*", (_req, res) => {
   res.status(404).json({
     message: "Page Not Found",
