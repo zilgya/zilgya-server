@@ -49,4 +49,4 @@ const createProduct = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getProducts };
+module.exports = { createProduct, findProductByQuery };

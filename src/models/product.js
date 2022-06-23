@@ -6,6 +6,8 @@ const getProducts = (query, route) => {
     const {
       find,
       categories,
+      brand,
+      color,
       sort = "categories_id",
       order = "desc",
       page = 1,
@@ -15,9 +17,9 @@ const getProducts = (query, route) => {
     let totalParam = [];
     let arr = [];
     let totalQuery =
-      "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id";
+      "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id";
     let sqlQuery =
-      "SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category,  u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id";
+      "SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.idjoin colors c2 on p.colors_id =c2.id where p.on_delete = false";
     if (!find && !categories) {
       sqlQuery += " order by " + sort + " " + order + " LIMIT $1 OFFSET $2";
       arr.push(parseInt(limit), offset);
@@ -56,6 +58,7 @@ const getProducts = (query, route) => {
       arr.push(find, categories, Number(limit), offset);
       totalParam.push(find, categories);
     }
+    // if(brand && )
     db.query(sqlQuery, arr)
       .then((result) => {
         if (result.rows.length === 0) {
