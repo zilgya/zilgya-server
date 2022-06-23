@@ -48,4 +48,29 @@ const checkToken = (req, res, next) => {
   });
 };
 
-module.exports = { checkDuplicate, checkToken };
+const emailToken = (req, _res, next) => {
+  const { token } = req.params;
+  jwt.verify(token, process.env.JWT_SECRET_CONFIRM_KEY, async (err, payload) => {
+    if (err) {
+      next({ status: 403, message: "Your link expired, please register again." });
+      return;
+    }
+    try {
+      const cachedToken = await client.get(`jwt${payload.email}`);
+      if (!cachedToken) {
+        throw new ErrorHandler({ status: 403, message: "Your link expired,please register again" });
+      }
+
+      if (cachedToken !== token) {
+        throw new ErrorHandler({ status: 403, message: "Token Unauthorize, please register again" });
+      }
+    } catch (error) {
+      const status = error.status ? error.status : 500;
+      next({ status, message: error.message });
+    }
+    req.userPayload = payload;
+    next();
+  });
+};
+
+module.exports = { checkDuplicate, checkToken, emailToken };

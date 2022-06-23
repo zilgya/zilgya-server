@@ -7,8 +7,8 @@ const register = (email, hashedPassword, roles_id) => {
     const created_at = new Date(Date.now());
     const values = [email, hashedPassword, roles_id, created_at];
     db.query(sqlQuery, values)
-      .then(() => {
-        resolve();
+      .then((result) => {
+        resolve({ data: result.rows[0] });
       })
       .catch((err) => {
         reject({ status: 500, err });
@@ -44,4 +44,17 @@ const getPassByUserEmail = async (email) => {
   }
 };
 
-module.exports = { register, getUserByEmail, getPassByUserEmail };
+const verifyEmail = async (email) => {
+  try {
+    let sqlQuery = "UPDATE users SET status='active' WHERE email=$1 RETURNING *";
+    const result = await db.query(sqlQuery, [email]);
+    if (!result.rowCount) throw new ErrorHandler({ status: 404, message: "User Not Found" });
+    return {
+      data: result.rows[0],
+    };
+  } catch (err) {
+    throw new ErrorHandler({ status: err.status ? err.status : 500, message: err.message });
+  }
+};
+
+module.exports = { register, getUserByEmail, getPassByUserEmail, verifyEmail };
