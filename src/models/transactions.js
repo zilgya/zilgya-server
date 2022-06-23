@@ -87,7 +87,8 @@ const updateTransactions = (params, body) => {
 const deleteDataTransactionsfromServer = (params) => {
     return new Promise((resolve, reject) => {
         const { id } = params;
-        const sqlQuery = "DELETE FROM transactions WHERE id=$1 returning *";
+        // const updated_at = new Date(Date.now());
+        const sqlQuery = "UPDATE transactions SET updated_at = now(), on_delete=true WHERE id = $1 RETURNING *";
         db.query(sqlQuery, [id])
             .then((data) => {
                 if (data.rows.length === 0) {

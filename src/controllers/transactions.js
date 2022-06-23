@@ -96,6 +96,7 @@ const deleteTransactionsbyId = (req, res) => {
             });
         })
         .catch((error) => {
+            //console.log(error)
             const { err, status } = error;
             res.status(status).json({
                 data: [],
