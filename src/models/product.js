@@ -3,7 +3,7 @@ const { ErrorHandler } = require("../middlewares/errorHandler");
 
 const getProducts = (query, route) => {
   return new Promise((resolve, reject) => {
-    const { find, categories, brand, color, sort = "categories_id", order = "desc", page = 1, limit = 12 } = query;
+    const { find, categories, sort = "categories_id", order = "desc", page = 1, limit = 12 } = query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     let totalParam = [];
     let arr = [];
@@ -15,20 +15,20 @@ const getProducts = (query, route) => {
       arr.push(parseInt(limit), offset);
     }
     if (find && !categories) {
-      sqlQuery += " where lower(p.name) like lower('%' || $1 || '%') order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
-      totalQuery += " where lower(p.name) like lower('%' || $1 || '%')";
+      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
+      totalQuery += " and lower(p.name) like lower('%' || $1 || '%')";
       arr.push(find, parseInt(limit), offset);
       totalParam.push(find);
     }
     if (categories && !find) {
-      sqlQuery += " where lower(c.name) = lower($1) order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
-      totalQuery += " where lower(c.name) = lower($1)";
+      sqlQuery += " and lower(c.name) = lower($1) order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
+      totalQuery += " and lower(c.name) = lower($1)";
       arr.push(categories, Number(limit), offset);
       totalParam.push(categories);
     }
     if (find && categories) {
-      sqlQuery += " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by " + sort + " " + order + " LIMIT $3 OFFSET $4";
-      totalQuery += " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
+      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by " + sort + " " + order + " LIMIT $3 OFFSET $4";
+      totalQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
       arr.push(find, categories, Number(limit), offset);
       totalParam.push(find, categories);
     }
@@ -57,6 +57,23 @@ const getProducts = (query, route) => {
         reject({ status: 500, err });
       });
   });
+};
+
+const getProductImages = async (id) => {
+  try {
+    const result = await db.query("SELECT url from images where product_id=$1", [id]);
+    if (!result.rowCount) {
+      throw new ErrorHandler({ status: 404, message: "Product Not Found" });
+    }
+    return {
+      data: result.rows,
+    };
+  } catch (error) {
+    throw new ErrorHandler({
+      status: error ? error.status : 500,
+      message: error.message,
+    });
+  }
 };
 
 const postProduct = async (body, image, id) => {
@@ -151,4 +168,4 @@ const deleteProduct = async (id) => {
   }
 };
 
-module.exports = { getProducts, postProduct, deleteProduct, updateProduct };
+module.exports = { getProducts, postProduct, deleteProduct, updateProduct, getProductImages };

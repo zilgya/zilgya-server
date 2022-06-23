@@ -1,4 +1,4 @@
-const { getProducts, postProduct, updateProduct, deleteProduct } = require("../models/product");
+const { getProducts, postProduct, updateProduct, deleteProduct, getProductImages } = require("../models/product");
 const { errorResponse } = require("../helpers/response");
 
 const findProductByQuery = (req, res) => {
@@ -21,6 +21,21 @@ const findProductByQuery = (req, res) => {
       const { err, status } = error;
       errorResponse(res, status, err);
     });
+};
+
+const getImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await getProductImages(id);
+    res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    const { message, status } = error;
+    res.status(status ? status : 500).json({
+      error: message,
+    });
+  }
 };
 
 const createProduct = async (req, res) => {
@@ -91,4 +106,5 @@ module.exports = {
   removeProduct,
   patchProduct,
   findProductByQuery,
+  getImages,
 };
