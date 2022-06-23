@@ -3,7 +3,7 @@ const { ErrorHandler } = require("../middlewares/errorHandler");
 
 const getProducts = (query, route) => {
   return new Promise((resolve, reject) => {
-    const { find, categories, sort = "categories_id", order = "desc", page = 1, limit = 12 } = query;
+    const { find, categories, sort = "p.created_at", order = "desc", page = 1, limit = 12 } = query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     let totalParam = [];
     let arr = [];
@@ -11,7 +11,7 @@ const getProducts = (query, route) => {
     let sqlQuery =
       "SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id where p.on_delete = false";
     if (!find && !categories) {
-      sqlQuery += " order by " + sort + " " + order + " LIMIT $1 OFFSET $2";
+      sqlQuery += " order by p." + sort + " " + order + " LIMIT $1 OFFSET $2";
       arr.push(parseInt(limit), offset);
     }
     if (find && !categories) {
@@ -21,7 +21,7 @@ const getProducts = (query, route) => {
       totalParam.push(find);
     }
     if (categories && !find) {
-      sqlQuery += " and lower(c.name) = lower($1) order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
+      sqlQuery += " and lower(c.name) = lower($1) order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
       totalQuery += " and lower(c.name) = lower($1)";
       arr.push(categories, Number(limit), offset);
       totalParam.push(categories);
@@ -58,6 +58,21 @@ const getProducts = (query, route) => {
       });
   });
 };
+
+const getProductDetail = async (id) => {
+  try {
+    const result = await db.query('SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id where p.on_delete = false and p.id=$1', [id])
+    if(!result.rowCount)throw new ErrorHandler({status:404,message:"Product Not Found"})
+    return {
+      data:result.rows[0]
+    }
+  } catch (error) {
+    throw new ErrorHandler({
+      status: error ? error.status : 500,
+      message: error.message,
+    });
+  }
+}
 
 const getProductImages = async (id) => {
   try {
@@ -168,4 +183,4 @@ const deleteProduct = async (id) => {
   }
 };
 
-module.exports = { getProducts, postProduct, deleteProduct, updateProduct, getProductImages };
+module.exports = { getProducts, postProduct, deleteProduct, updateProduct, getProductImages,getProductDetail };
