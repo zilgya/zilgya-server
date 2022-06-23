@@ -1,14 +1,122 @@
 const { db } = require("../config/database");
 const { ErrorHandler } = require("../middlewares/errorHandler");
 
+const getProducts = (query, route) => {
+  return new Promise((resolve, reject) => {
+    const {
+      find,
+      categories,
+      brand,
+      color,
+      sort = "categories_id",
+      order = "desc",
+      page = 1,
+      limit = 12,
+    } = query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    let totalParam = [];
+    let arr = [];
+    let totalQuery =
+      "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id";
+    let sqlQuery =
+      "SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id where p.on_delete = false";
+    if (!find && !categories) {
+      sqlQuery += " order by " + sort + " " + order + " LIMIT $1 OFFSET $2";
+      arr.push(parseInt(limit), offset);
+    }
+    if (find && !categories) {
+      sqlQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $2 OFFSET $3";
+      totalQuery += " where lower(p.name) like lower('%' || $1 || '%')";
+      arr.push(find, parseInt(limit), offset);
+      totalParam.push(find);
+    }
+    if (categories && !find) {
+      sqlQuery +=
+        " where lower(c.name) = lower($1) order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $2 OFFSET $3";
+      totalQuery += " where lower(c.name) = lower($1)";
+      arr.push(categories, Number(limit), offset);
+      totalParam.push(categories);
+    }
+    if (find && categories) {
+      sqlQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by " +
+        sort +
+        " " +
+        order +
+        " LIMIT $3 OFFSET $4";
+      totalQuery +=
+        " where lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
+      arr.push(find, categories, Number(limit), offset);
+      totalParam.push(find, categories);
+    }
+    db.query(sqlQuery, arr)
+      .then((result) => {
+        if (result.rows.length === 0) {
+          return reject({ status: 404, err: "Product Not Found" });
+        }
+        const response = {
+          total: result.rowCount,
+          data: result.rows,
+        };
+        db.query(totalQuery, totalParam)
+          .then((result) => {
+            response.totalData = Number(result.rows[0]["total_products"]);
+            response.totalPage = Math.ceil(response.totalData / Number(limit));
+            if (page < response.totalPage)
+              response.nextPage = `/product${route.path}?page=${
+                parseInt(page) + 1
+              }`;
+            if (offset > 0)
+              response.previousPage = `/product${route.path}?page=${
+                parseInt(page) - 1
+              }`;
+            resolve(response);
+          })
+          .catch((err) => {
+            reject({ status: 500, err });
+          });
+      })
+      .catch((err) => {
+        reject({ status: 500, err });
+      });
+  });
+};
+
 const postProduct = async (body, image, id) => {
-  const { name, description, price, stock, categories_id, brands_id, colors_id } = body;
+  const {
+    name,
+    description,
+    price,
+    stock,
+    categories_id,
+    brands_id,
+    colors_id,
+  } = body;
   try {
     let queryParams = [];
     let params = [];
-    const sqlQuery = "INSERT INTO products(name,description,price,stock,categories_id,users_id,brands_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) returning id";
+    const sqlQuery =
+      "INSERT INTO products(name,description,price,stock,categories_id,users_id,brands_id,colors_id,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,now(),now()) returning id";
 
-    const product = await db.query(sqlQuery, [name, description, price, stock, categories_id, id, brands_id, colors_id]);
+    const product = await db.query(sqlQuery, [
+      name,
+      description,
+      price,
+      stock,
+      categories_id,
+      id,
+      brands_id,
+      colors_id,
+    ]);
 
     const product_id = product.rows[0].id;
 
@@ -28,12 +136,23 @@ const postProduct = async (body, image, id) => {
       message: "Product Successfully Created",
     };
   } catch (error) {
-    throw new ErrorHandler({ status: error ? error.status : 500, message: error.message });
+    throw new ErrorHandler({
+      status: error ? error.status : 500,
+      message: error.message,
+    });
   }
 };
 
 const updateProduct = async (body, user_id, product_id, image) => {
-  const { name, price, description, stock, categories_id, brands_id, colors_id } = body;
+  const {
+    name,
+    price,
+    description,
+    stock,
+    categories_id,
+    brands_id,
+    colors_id,
+  } = body;
   try {
     let params = [];
     let queryParams = [];
@@ -45,7 +164,9 @@ const updateProduct = async (body, user_id, product_id, image) => {
       });
       queryParams.pop();
       imageQuery += queryParams.join("");
-      imageQuery += `) as c(column_a) where i.product_id=$${params.length + 1} RETURNING *`;
+      imageQuery += `) as c(column_a) where i.product_id=$${
+        params.length + 1
+      } RETURNING *`;
       params.push(product_id);
 
       await db.query(imageQuery, params);
@@ -54,7 +175,17 @@ const updateProduct = async (body, user_id, product_id, image) => {
     const productQuery =
       "UPDATE products SET name = COALESCE(NULLIF($1, ''), name), price = COALESCE(NULLIF($2, '')::integer, price), description = COALESCE(NULLIF($3, ''), description), stock = COALESCE(NULLIF($4, '')::integer, stock),categories_id = COALESCE(NULLIF($5, '')::integer, categories_id),brands_id = COALESCE(NULLIF($6, '')::integer, brands_id),colors_id = COALESCE(NULLIF($7, '')::integer, colors_id), updated_at = now() WHERE id = $8 and users_id = $9 RETURNING *";
 
-    const result = await db.query(productQuery, [name, price, description, stock, categories_id, brands_id, colors_id, product_id, user_id]);
+    const result = await db.query(productQuery, [
+      name,
+      price,
+      description,
+      stock,
+      categories_id,
+      brands_id,
+      colors_id,
+      product_id,
+      user_id,
+    ]);
 
     if (!result.rowCount) {
       throw new ErrorHandler({ status: 404, message: "Product Not Found" });
@@ -62,13 +193,17 @@ const updateProduct = async (body, user_id, product_id, image) => {
 
     return { data: result.rows[0], message: "Product Successfully Updated" };
   } catch (err) {
-    throw new ErrorHandler({ status: err.status ? err.status : 500, message: err.message });
+    throw new ErrorHandler({
+      status: err.status ? err.status : 500,
+      message: err.message,
+    });
   }
 };
 
 const deleteProduct = async (id) => {
   try {
-    const sqlQuery = "UPDATE products set on_delete=true WHERE id = $1 RETURNING *";
+    const sqlQuery =
+      "UPDATE products set on_delete=true WHERE id = $1 RETURNING *";
 
     const product = await db.query(sqlQuery, id);
     if (!product.rowCount) {
@@ -80,8 +215,11 @@ const deleteProduct = async (id) => {
       message: "Product Successfully Deleted",
     };
   } catch (error) {
-    throw new ErrorHandler({ status: error ? error.status : 500, message: error.message });
+    throw new ErrorHandler({
+      status: error ? error.status : 500,
+      message: error.message,
+    });
   }
 };
 
-module.exports = { postProduct, deleteProduct, updateProduct };
+module.exports = { getProducts, postProduct, deleteProduct, updateProduct };

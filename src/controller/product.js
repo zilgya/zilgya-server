@@ -1,4 +1,35 @@
-const { postProduct, updateProduct } = require("../models/product");
+const { db } = require("../config/database");
+
+const {
+  getProducts,
+  postProduct,
+  updateProduct,
+  deleteProduct,
+} = require("../models/product");
+const { errorResponse } = require("../helpers/response");
+
+const findProductByQuery = (req, res) => {
+  getProducts(req.query, req.route)
+    .then((result) => {
+      const { data, total, totalData, totalPage, nextPage, previousPage } =
+        result;
+      const meta = {
+        totalData,
+        totalPage,
+        nextPage,
+        previousPage,
+      };
+      res.status(200).json({
+        data,
+        total,
+        meta,
+      });
+    })
+    .catch((error) => {
+      const { err, status } = error;
+      errorResponse(res, status, err);
+    });
+};
 
 const createProduct = async (req, res) => {
   try {
@@ -34,7 +65,12 @@ const patchProduct = async (req, res) => {
       image = files;
     }
 
-    const { data, message } = await updateProduct(req.body, user_id, product_id, image);
+    const { data, message } = await updateProduct(
+      req.body,
+      user_id,
+      product_id,
+      image
+    );
     res.status(200).json({
       data,
       message,
@@ -50,7 +86,7 @@ const patchProduct = async (req, res) => {
 const removeProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, message } = await postProduct(id);
+    const { data, message } = await deleteProduct(id);
     res.status(200).json({
       data,
       message,
@@ -63,4 +99,9 @@ const removeProduct = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, removeProduct, patchProduct };
+module.exports = {
+  createProduct,
+  removeProduct,
+  patchProduct,
+  findProductByQuery,
+};
