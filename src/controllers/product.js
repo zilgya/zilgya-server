@@ -1,18 +1,10 @@
-const { db } = require("../config/database");
-
-const {
-  getProducts,
-  postProduct,
-  updateProduct,
-  deleteProduct,
-} = require("../models/product");
+const { getProducts, postProduct, updateProduct, deleteProduct } = require("../models/product");
 const { errorResponse } = require("../helpers/response");
 
 const findProductByQuery = (req, res) => {
   getProducts(req.query, req.route)
     .then((result) => {
-      const { data, total, totalData, totalPage, nextPage, previousPage } =
-        result;
+      const { data, total, totalData, totalPage, nextPage, previousPage } = result;
       const meta = {
         totalData,
         totalPage,
@@ -65,12 +57,7 @@ const patchProduct = async (req, res) => {
       image = files;
     }
 
-    const { data, message } = await updateProduct(
-      req.body,
-      user_id,
-      product_id,
-      image
-    );
+    const { data, message } = await updateProduct(req.body, user_id, product_id, image);
     res.status(200).json({
       data,
       message,
