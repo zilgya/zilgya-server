@@ -59,6 +59,21 @@ const getProducts = (query, route) => {
   });
 };
 
+const getProductDetail = async (id) => {
+  try {
+    const result = await db.query('SELECT p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id where p.on_delete = false and p.id=$1', [id])
+    if(!result.rowCount)throw new ErrorHandler({status:404,message:"Product Not Found"})
+    return {
+      data:result.rows[0]
+    }
+  } catch (error) {
+    throw new ErrorHandler({
+      status: error ? error.status : 500,
+      message: error.message,
+    });
+  }
+}
+
 const getProductImages = async (id) => {
   try {
     const result = await db.query("SELECT url from images where product_id=$1", [id]);
@@ -151,7 +166,7 @@ const deleteProduct = async (id) => {
   try {
     const sqlQuery = "UPDATE products set on_delete=true WHERE id = $1 RETURNING *";
 
-    const product = await db.query(sqlQuery, id);
+    const product = await db.query(sqlQuery, [id]);
     if (!product.rowCount) {
       throw new ErrorHandler({ status: 404, message: "Product Not Found" });
     }
@@ -168,4 +183,4 @@ const deleteProduct = async (id) => {
   }
 };
 
-module.exports = { getProducts, postProduct, deleteProduct, updateProduct, getProductImages };
+module.exports = { getProducts, postProduct, deleteProduct, updateProduct, getProductImages,getProductDetail };
