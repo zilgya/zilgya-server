@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const { register, getPassByUserEmail } = require("../models/auth");
 const { successResponse, errorResponse } = require("../helpers/response");
+const { client } = require("../config/redis.js");
+const { removeAccess } = require("../middlewares/auth");
 
 const auth = {};
 
@@ -15,18 +17,17 @@ auth.register = (req, res) => {
   bcrypt
     .hash(password, 10)
     .then((hashedPassword) => {
-      register( email, hashedPassword, roles_id, created_at)
+      register(email, hashedPassword, roles_id, created_at)
         .then(() => {
           successResponse(res, 201, { msg: "Register Success" }, null);
         })
         .catch((error) => {
-          //console.log(error);
           const { status, err } = error;
           errorResponse(res, status, err);
         });
     })
     .catch((err) => {
-      console.log(err)
+      console.log(err);
       errorResponse(res, 500, err);
     });
 };
@@ -40,25 +41,37 @@ auth.signIn = async (req, res) => {
     // cek kecocokan email dan pass di db
     const data = await getPassByUserEmail(email);
     const result = await bcrypt.compare(password, data.password);
-    if (!result)
-      return errorResponse(res, 400, { msg: "Email or Password wrong !" });
+    if (!result) return errorResponse(res, 400, { msg: "Email or Password wrong !" });
     // generate jwt
     const payload = {
       id: data.id,
       email,
-      roles_id: data.roles_id
+      roles_id: data.roles_id,
     };
+
     const jwtOptions = {
       issuer: process.env.JWT_ISSUER,
       expiresIn: "12h", // expired in 10000s
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptions);
+    await client.set(`jwt${data.id}`, token);
     // return
     successResponse(res, 200, { email, token, roles_id: data.roles_id }, null);
   } catch (error) {
-    //console.log(error);
-    const { status = 500 ,err } = error;
+    const { status = 500, err } = error;
     errorResponse(res, status, err);
+  }
+};
+
+auth.logout = async (req, res) => {
+  try {
+    const cachedLogin = await client.get(`jwt${req.userPayload.id}`);
+    if (cachedLogin) {
+      await client.del(`jwt${req.userPayload.id}`);
+    }
+    successResponse(res, 200, { message: "You have successfully logged out" }, null);
+  } catch (err) {
+    errorResponse(res, 500, err.message);
   }
 };
 

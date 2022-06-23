@@ -5,12 +5,14 @@ const cors = require("cors");
 
 const mainRouter = require("./src/routes/index.js");
 const { dbConn } = require("./src/config/database.js");
+const { redisConn } = require("./src/config/redis");
 
 const cloudinaryConfig = require("./src/middlewares/cloudinary");
 
 dbConn();
+redisConn();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 const originList = ["http://localhost:3000", "::1"];
 

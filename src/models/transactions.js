@@ -98,6 +98,7 @@ const deleteDataTransactionsfromServer = (params) => {
                     data: data.rows,
                     msg: "Data Terhapus"
                 }
+                return resolve(response)
             })
             .catch((err) => {
                 reject({ status: 500, err });
