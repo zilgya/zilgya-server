@@ -50,7 +50,7 @@ const getAllTransactionsfromUsers = (id) => {
 
 const getAllTransactionsfromSeller = (id) => {
     return new Promise((resolve, reject) => {
-        const sqlQuery = "select images.url, products.name as name_product, products.price, transaction_products.quantity, transactions.order_status, transactions.total_price from products join images on products.id  = images.product_id join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id" ;
+        const sqlQuery = "select images.url, products.name as name_product, products.price, transaction_products.quantity, transactions.order_status, transactions.total_price from products join images on products.id  = images.product_id join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id where users.id = $1" ;
         db.query(sqlQuery, [id])
             .then((result) => {
                 //console.log(result)
@@ -66,8 +66,48 @@ const getAllTransactionsfromSeller = (id) => {
     });
 };
 
+const updateTransactions = (params, body) => {
+    return new Promise((resolve, reject) => {
+        const { id } = params
+        const { users_id, sub_total, shipping, tax, total_price } = body;
+        const updated_at = new Date(Date.now());
+        const sqlQuery =
+            "UPDATE transactions SET users_id=COALESCE($1, users_id), sub_total=COALESCE($2, sub_total), shipping=COALESCE($3, shipping), tax=COALESCE($4, tax), total_price=COALESCE($5, total_price), updated_at=COALESCE($6, updated_at) where id=$7 returning *";
+        db.query(sqlQuery, [users_id, sub_total, shipping, tax, total_price, updated_at, id])
+            .then((result) => {
+                resolve({
+                    data: result.rows,
+                    msg: null,
+                })
+            })
+            .catch((err) => reject({ status: 500, err }));
+    });
+};
+
+const deleteDataTransactionsfromServer = (params) => {
+    return new Promise((resolve, reject) => {
+        const { id } = params;
+        const sqlQuery = "DELETE FROM transactions WHERE id=$1 returning *";
+        db.query(sqlQuery, [id])
+            .then((data) => {
+                if (data.rows.length === 0) {
+                    return resolve({ status: 404, err: "" })
+                }
+                const response = {
+                    data: data.rows,
+                    msg: "Data Terhapus"
+                }
+            })
+            .catch((err) => {
+                reject({ status: 500, err });
+            })
+    })
+}
+
 module.exports = {
     createNewTransactions,
     getAllTransactionsfromUsers,
     getAllTransactionsfromSeller,
+    updateTransactions,
+    deleteDataTransactionsfromServer
 }

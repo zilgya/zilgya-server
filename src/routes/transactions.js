@@ -10,5 +10,7 @@ const { checkToken } = require("../middlewares/auth");
 Router.post("/", checkToken, transactionsControllers.postNewTransactions);
 Router.get("/users", checkToken, transactionsControllers.getAllTransactionsUser);
 Router.get("/seller", checkToken, transactionsControllers.getAllTransactionsSeller);
+Router.patch("/:id", checkToken, transactionsControllers.patchUpdateTransactions);
+Router.delete("/delete/:id", checkToken, transactionsControllers.deleteTransactionsbyId);
 
 module.exports = Router;
