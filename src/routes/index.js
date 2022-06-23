@@ -4,6 +4,7 @@ const userRouter = require('./user')
 const authRouter = require("./auth");
 const transactionsRouter = require("./transactions");
 const productRoutes = require("./product");
+const promoRouter = require("./promo");
 
 Router.get("/", (_req, res) => {
   res.json({
@@ -14,6 +15,7 @@ Router.use("/auth", authRouter);
 Router.use("/user", userRouter);
 Router.use("/product",productRoutes);
 Router.use("/transactions", transactionsRouter);
+Router.use("/promo", promoRouter);
 Router.get("*", (_req, res) => {
   res.status(404).json({
     message: "Page Not Found",
