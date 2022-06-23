@@ -1,18 +1,13 @@
 const Router = require("express").Router();
 
 const authController = require("../controller/auth");
-const { checkDuplicate } = require("../middlewares/auth");
-// const validate = require("../middlewares/users_validate");
+const { checkDuplicate, checkToken } = require("../middlewares/auth");
 
 // register
 Router.post("/new", checkDuplicate, authController.register);
 // sign in
 Router.post("/", authController.signIn);
 // sign out
-Router.delete("/", (_, res) => {
-  res.json({
-    msg: "Berhasil Logout",
-  });
-});
+Router.delete("/", checkToken, authController.logout);
 
 module.exports = Router;
