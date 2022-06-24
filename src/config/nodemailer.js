@@ -95,7 +95,7 @@ const sendConfirmationPayment = async (name, email, items, totalPrice, payMethod
   }
 };
 
-const sendPasswordConfirmation = async (name, email) => {
+const sendPasswordConfirmation = async (name, email, confirmCode) => {
   try {
     const transport = nodemailer.createTransport({
       service: "gmail",
@@ -108,14 +108,15 @@ const sendPasswordConfirmation = async (name, email) => {
         refreshToken: process.env.OAUTH_REFRESH_TOKEN,
       },
     });
-    let html = `<h2>Juncoffee Forgot Password Confirmation</h2>
+    let html = `<h2>Zilgya Furniture Forgot Password Confirmation</h2>
     <h3>Hi, ${name}</h3>
     <h3>Here is your account details:</h3>
     <ul>
     <li>Name: <h3>${name}</h3></li>
     <li>Email: <h3>${email}</h3></li>
   </ul>
-  
+  YOUR RESET PASSWORD CONFIRMATION CODE is <h1>${confirmCode}</h1> <br>
+  INPUT THIS CODE WHEN RESET YOUR PASSWORD !
   <h2> <a href=${process.env.CLIENT_URL}/forgot-password/${email}> Click here to reset your password</a></h2>
     </div>`;
 
