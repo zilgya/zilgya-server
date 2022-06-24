@@ -3,7 +3,7 @@ const { ErrorHandler } = require("../middlewares/errorHandler");
 
 const getProducts = (query, route) => {
   return new Promise((resolve, reject) => {
-    const { find, categories, sort = "created_at", order = "desc", page = 1, limit = 12 } = query;
+    const { find, categories, sort = "created_at", order = "asc", page = 1, limit = 12 } = query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     let totalParam = [];
     let arr = [];
