@@ -71,7 +71,12 @@ const getProducts = (query, route) => {
             response.totalPage = Math.ceil(response.totalData / Number(limit));
             if (page < response.totalPage) response.nextPage = `/product${route.path}?page=${parseInt(page) + 1}`;
             if (offset > 0) response.previousPage = `/product${route.path}?page=${parseInt(page) - 1}`;
-            resolve(response);
+            db.query("select count(*) as total,c.name as category from products p join categories c on p.categories_id=c.id where on_delete=false group by categories_id,c.name")
+              .then((r) => {
+                response.totalCat = r.rows;
+                resolve(response);
+              })
+              .catch((err) => reject({ status: 500, err }));
           })
           .catch((err) => {
             reject({ status: 500, err });
