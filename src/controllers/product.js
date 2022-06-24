@@ -41,7 +41,7 @@ const getImages = async (req, res) => {
 const productDetail = async (req,res)=>{
   try {
     const {id} = req.params
-    const {data} = getProductDetail(id)
+    const {data} = await getProductDetail(id)
     res.status(200).json({
       data
     })
