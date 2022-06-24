@@ -9,25 +9,25 @@ const getProducts = (query, route) => {
     let arr = [];
     let totalQuery = "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id ";
     let sqlQuery =
-      "SELECT p.id,p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id where p.on_delete = false";
+      "select * from (SELECT distinct on(p.id)p.id,p.name,i.url as image, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id,p.created_at as created_at,p.on_delete as on_delete FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id join images i on i.product_id=p.id) p where on_delete = false";
     if (!find && !categories) {
-      sqlQuery += " order by p." + sort + " " + order + " LIMIT $1 OFFSET $2";
+      sqlQuery += " order by " + sort + " " + order + " LIMIT $1 OFFSET $2";
       arr.push(parseInt(limit), offset);
     }
     if (find && !categories) {
-      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
+      sqlQuery += " and lower(name) like lower('%' || $1 || '%') order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
       totalQuery += " and lower(p.name) like lower('%' || $1 || '%')";
       arr.push(find, parseInt(limit), offset);
       totalParam.push(find);
     }
     if (categories && !find) {
-      sqlQuery += " and lower(c.name) = lower($1) order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
+      sqlQuery += " and lower(category) = lower($1) order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
       totalQuery += " and lower(c.name) = lower($1)";
       arr.push(categories, Number(limit), offset);
       totalParam.push(categories);
     }
     if (find && categories) {
-      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by p." + sort + " " + order + " LIMIT $3 OFFSET $4";
+      sqlQuery += " and lower(name) like lower('%' || $1 || '%') and lower(category) = lower($2) order by " + sort + " " + order + " LIMIT $3 OFFSET $4";
       totalQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
       arr.push(find, categories, Number(limit), offset);
       totalParam.push(find, categories);
