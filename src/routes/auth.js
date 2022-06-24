@@ -9,6 +9,8 @@ Router.post("/new", checkDuplicate, authControllers.register);
 Router.post("/", authControllers.signIn);
 // confirm email
 Router.get("/confirm/:token", emailToken, authControllers.confirmEmail);
+// forgot-password
+Router.get("/forgot-password", authControllers.forgotPassword);
 // sign out
 Router.delete("/", checkToken, authControllers.logout);
 

@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken");
 const { register, getPassByUserEmail, verifyEmail } = require("../models/auth");
 const { successResponse, errorResponse } = require("../helpers/response");
 const { client } = require("../config/redis.js");
-const { sendConfirmationEmail } = require("../config/nodemailer");
+const { sendConfirmationEmail, sendPasswordConfirmation } = require("../config/nodemailer");
+const generator = require("generate-password");
 
 const auth = {};
 
@@ -96,6 +97,27 @@ auth.confirmEmail = async (req, res) => {
     const status = err.status ? err.status : 500;
     res.status(status).json({
       error: err.message,
+    });
+  }
+};
+
+auth.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const confirmCode = generator.generate({
+      length: 7,
+      numbers: true,
+    });
+
+    await sendPasswordConfirmation(email, email, confirmCode);
+    await client.set(`forgotpass${email}`, confirmCode);
+    res.status(200).json({
+      message: "Please check your email for password confirmation",
+    });
+  } catch (error) {
+    const { message, status } = error;
+    res.status(status ? status : 500).json({
+      error: message,
     });
   }
 };
