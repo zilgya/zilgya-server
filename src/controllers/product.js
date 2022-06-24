@@ -1,10 +1,19 @@
-const { getProducts, postProduct, updateProduct, deleteProduct, getProductImages, getProductDetail } = require("../models/product");
+const {
+  getProducts,
+  getMyProducts,
+  postProduct,
+  updateProduct,
+  deleteProduct,
+  getProductImages,
+  getProductDetail,
+} = require("../models/product");
 const { errorResponse } = require("../helpers/response");
 
 const findProductByQuery = (req, res) => {
   getProducts(req.query, req.route)
     .then((result) => {
-      const { data, total, totalData, totalPage, nextPage, previousPage } = result;
+      const { data, total, totalData, totalPage, nextPage, previousPage } =
+        result;
       const meta = {
         totalData,
         totalPage,
@@ -23,6 +32,29 @@ const findProductByQuery = (req, res) => {
     });
 };
 
+const findSellerProduct = async (req, res) => {
+  try {
+    const { id } = await req.userPayload;
+    const { data, total, totalData, totalPage, nextPage, previousPage } =
+      await getMyProducts(id, req.query, req.route);
+    const meta = {
+      totalData,
+      totalPage,
+      nextPage,
+      previousPage,
+    };
+    res.status(200).json({
+      data,
+      total,
+      meta,
+    });
+  } catch (error) {
+    const { err, status } = error;
+    console.log(error)
+    errorResponse(res, status, err);
+  }
+};
+
 const getImages = async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,20 +70,20 @@ const getImages = async (req, res) => {
   }
 };
 
-const productDetail = async (req,res)=>{
+const productDetail = async (req, res) => {
   try {
-    const {id} = req.params
-    const {data} = await getProductDetail(id)
+    const { id } = req.params;
+    const { data } = await getProductDetail(id);
     res.status(200).json({
-      data
-    })
+      data,
+    });
   } catch (error) {
-    const {status,message}=error
+    const { status, message } = error;
     res.status(status ? status : 500).json({
-      error:message
-    })
+      error: message,
+    });
   }
-}
+};
 
 const createProduct = async (req, res) => {
   try {
@@ -87,7 +119,12 @@ const patchProduct = async (req, res) => {
       image = files;
     }
 
-    const { data, message } = await updateProduct(req.body, user_id, product_id, image);
+    const { data, message } = await updateProduct(
+      req.body,
+      user_id,
+      product_id,
+      image
+    );
     res.status(200).json({
       data,
       message,
@@ -121,6 +158,7 @@ module.exports = {
   removeProduct,
   patchProduct,
   findProductByQuery,
+  findSellerProduct,
   getImages,
-  productDetail
+  productDetail,
 };
