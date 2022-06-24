@@ -6,6 +6,7 @@ const findProductByQuery = (req, res) => {
     .then((result) => {
       const { data, total, totalData, totalCat, totalPage, nextPage, previousPage } = result;
       const meta = {
+        totalCat,
         totalData,
         totalPage,
         nextPage,
@@ -15,7 +16,6 @@ const findProductByQuery = (req, res) => {
         data,
         total,
         meta,
-        totalCat,
       });
     })
     .catch((error) => {
