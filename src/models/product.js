@@ -44,6 +44,12 @@ const getProducts = (query, route) => {
       arr.push(categories, minPrice, maxPrice, Number(limit), offset);
       totalParam.push(categories, minPrice, maxPrice);
     }
+    if (minPrice && !categories && !find) {
+      sqlQuery += " and price >= $1 and price <= $2 order by " + sort + " " + order + " LIMIT $3 OFFSET $4";
+      totalQuery += " and p.price >= $1 and p.price <= $2";
+      arr.push(minPrice, maxPrice, Number(limit), offset);
+      totalParam.push(minPrice, maxPrice);
+    }
     if (minPrice && categories && find) {
       sqlQuery += " and lower(name) like lower('%' || $1 || '%') and lower(category) = lower($2) and price >= $3 and price <= $4 order by " + sort + " " + order + " LIMIT $5 OFFSET $6";
       totalQuery += " and lower(name) like lower('%' || $1 || '%') and lower(category) = lower($2) and p.price >= $3 and p.price <= $4";
