@@ -64,9 +64,9 @@ const sendConfirmationPayment = async (name, email, items, totalPrice, payMethod
   <h2> <a href=${process.env.CLIENT_URL}/auth/payment/${token}> Click here to confirm your payment</a></h2>
     </div>`;
     if (payMethod === "cash on delivery") {
-      html = `<h2>Juncoffee Payment Confirmation</h2>
+      html = `<h2>Zilgya Furniture Payment Confirmation</h2>
       <h3>Hi, ${name}</h3>
-      <h3>Thank you for shopping at Juncoffee. here is your transaction details:</h3>
+      <h3>Thank you for shopping at Zilgya Furniture. here is your transaction details:</h3>
       ${items.map((val) => {
         return `<ul><h3>${val.name}</h3> 
         <img src=${val.image}/>

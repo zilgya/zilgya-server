@@ -20,9 +20,8 @@ const dbConn = async () => {
     console.log("DB connected");
   } catch (err) {
     console.log(`Error: ${err.message}`);
-  }finally{
-     client.release()
-    
+  } finally {
+    client.release();
   }
 };
 
