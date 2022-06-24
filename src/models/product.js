@@ -40,7 +40,7 @@ const getProducts = (query, route) => {
     }
     if (minPrice && categories && !find) {
       sqlQuery += " and lower(category) = lower($1) and price >= $2 and price <= $3 order by " + sort + " " + order + " LIMIT $4 OFFSET $5";
-      totalQuery += " and lower(category) = lower($1) and p.price >= $2 and p.price <= $3";
+      totalQuery += " and lower(c.name) = lower($1) and p.price >= $2 and p.price <= $3";
       arr.push(categories, minPrice, maxPrice, Number(limit), offset);
       totalParam.push(categories, minPrice, maxPrice);
     }
@@ -52,7 +52,7 @@ const getProducts = (query, route) => {
     }
     if (minPrice && categories && find) {
       sqlQuery += " and lower(name) like lower('%' || $1 || '%') and lower(category) = lower($2) and price >= $3 and price <= $4 order by " + sort + " " + order + " LIMIT $5 OFFSET $6";
-      totalQuery += " and lower(name) like lower('%' || $1 || '%') and lower(category) = lower($2) and p.price >= $3 and p.price <= $4";
+      totalQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) and p.price >= $3 and p.price <= $4";
       arr.push(find, categories, minPrice, maxPrice, Number(limit), offset);
       totalParam.push(find, categories, minPrice, maxPrice);
     }
