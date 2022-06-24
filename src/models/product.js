@@ -15,7 +15,7 @@ const getProducts = (query, route) => {
       arr.push(parseInt(limit), offset);
     }
     if (find && !categories) {
-      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') order by " + sort + " " + order + " LIMIT $2 OFFSET $3";
+      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
       totalQuery += " and lower(p.name) like lower('%' || $1 || '%')";
       arr.push(find, parseInt(limit), offset);
       totalParam.push(find);
@@ -27,7 +27,7 @@ const getProducts = (query, route) => {
       totalParam.push(categories);
     }
     if (find && categories) {
-      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by " + sort + " " + order + " LIMIT $3 OFFSET $4";
+      sqlQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2) order by p." + sort + " " + order + " LIMIT $3 OFFSET $4";
       totalQuery += " and lower(p.name) like lower('%' || $1 || '%') and lower(c.name) = lower($2)";
       arr.push(find, categories, Number(limit), offset);
       totalParam.push(find, categories);

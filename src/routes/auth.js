@@ -1,10 +1,11 @@
 const Router = require("express").Router();
 
 const authControllers = require("../controllers/auth");
+const validateRegister = require("../middlewares/auth") 
 const { checkDuplicate, checkToken, emailToken } = require("../middlewares/auth");
 
 // register
-Router.post("/new", checkDuplicate, authControllers.register);
+Router.post("/new", validateRegister.validateRegisterUsers ,checkDuplicate, authControllers.register);
 // sign in
 Router.post("/", authControllers.signIn);
 // confirm email

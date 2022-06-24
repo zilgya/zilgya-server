@@ -1,8 +1,26 @@
+const validate = {};
 const jwt = require("jsonwebtoken");
 const { errorResponse } = require("../helpers/response");
 const { getUserByEmail } = require("../models/auth");
 const { client } = require("../config/redis");
 const { ErrorHandler } = require("./errorHandler");
+
+const { check, validationResult } = require('express-validator');
+const rulesCreateUser = [check('email').isEmail().notEmpty(), check('password').notEmpty(), check('roles_id').toInt().notEmpty()];
+
+const validateRegisterUsers = [
+  rulesCreateUser,
+  (req, res, next) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(400).json({
+        msg: 'Register invalid',
+        error: error.array(),
+      });
+    }
+    next();
+  },
+];
 
 const checkDuplicate = (req, res, next) => {
   getUserByEmail(req.body.email)
@@ -73,4 +91,4 @@ const emailToken = (req, _res, next) => {
   });
 };
 
-module.exports = { checkDuplicate, checkToken, emailToken };
+module.exports = { checkDuplicate, checkToken, emailToken, validateRegisterUsers };

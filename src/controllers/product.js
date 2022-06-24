@@ -59,7 +59,7 @@ const createProduct = async (req, res) => {
     const { id } = req.userPayload;
     const { files } = req;
 
-    if (files.length) {
+    if (files) {
       image = files;
     }
 
