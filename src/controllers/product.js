@@ -1,27 +1,48 @@
 const { getProducts, getMyProducts, postProduct, updateProduct, deleteProduct, getProductImages, getProductDetail } = require("../models/product");
 const { errorResponse } = require("../helpers/response");
 
-const findProductByQuery = (req, res) => {
-  getProducts(req.query, req.route)
-    .then((result) => {
-      const { data, total, totalData, totalCat, totalPage, nextPage, previousPage } = result;
-      const meta = {
-        totalCat,
-        totalData,
-        totalPage,
-        nextPage,
-        previousPage,
-      };
-      res.status(200).json({
-        data,
-        total,
-        meta,
-      });
-    })
-    .catch((error) => {
-      const { err, status } = error;
-      errorResponse(res, status, err);
+const findProductByQuery = async (req, res) => {
+  try {
+    const { totalCategory, totalProduct, totalPage, data } = await getProducts(req.query);
+    const { page = 1, limit = 12 } = req.query;
+    const queryProp = Object.keys(req.query);
+    let pageQuery = "?page=";
+    let limitQuery = `&limit=${limit}`;
+    let route = "";
+
+    const re = new RegExp(`\&page=${page}`);
+    const reg = new RegExp(`\&limit=${limit}`);
+
+    if (queryProp.length) {
+      route = req._parsedUrl.search.replace(/\?/g, "&").replace(re, "").replace(reg, "");
+    }
+
+    const currentPage = Number(page);
+    const nextPage = `/product${pageQuery}${Number(page) + 1}${limitQuery}${route}`;
+    const prevPage = `/product${pageQuery}${Number(page) - 1}${limitQuery}${route}`;
+
+    const meta = {
+      totalCategory,
+      totalProduct,
+      totalPage,
+      currentPage,
+      nextPage: currentPage === Number(totalPage) ? null : nextPage,
+      prevPage: currentPage === 1 ? null : prevPage,
+    };
+
+    data.forEach((val) => delete val.total);
+
+    res.status(200).json({
+      meta,
+      data,
     });
+  } catch (err) {
+    const { message } = err;
+    const status = err.status ? err.status : 500;
+    res.status(status).json({
+      error: message,
+    });
+  }
 };
 
 const findSellerProduct = async (req, res) => {
