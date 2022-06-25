@@ -5,22 +5,36 @@ const { getUserByEmail } = require("../models/auth");
 const { client } = require("../config/redis");
 const { ErrorHandler } = require("./errorHandler");
 
-const { check, validationResult } = require('express-validator');
-const rulesCreateUser = [check('email').isEmail().notEmpty(), check('password').notEmpty(), check('roles_id').toInt().notEmpty()];
+const registerInput = (req, res, next) => {
+  // cek apakah Undifined body sesuai dengan yang diinginkan
+  const { email, password, roles_id } = req.body;
 
-const validateRegisterUsers = [
-  rulesCreateUser,
-  (req, res, next) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(400).json({
-        msg: 'Register invalid',
-        error: error.array(),
-      });
-    }
-    next();
-  },
-];
+  if (!email) {
+    return errorResponse(res, 400, { msg: "Undefined data email !" });
+  } 
+  if (!password){
+    return errorResponse(res, 400, { msg: "Undefined data password !" });
+  } 
+  if (!roles_id) {
+    return errorResponse(res, 400, { msg: "Undefined data role !" });
+  }
+
+  next();
+};
+
+const loginInput = (req, res, next) => {
+  // cek apakah Undifined body sesuai dengan yang diinginkan
+  const { email, password, roles_id } = req.body;
+
+  if (!email) {
+    return errorResponse(res, 400, { msg: "Undefined data email !" });
+  } 
+  if (!password){
+    return errorResponse(res, 400, { msg: "Undefined data password !" });
+  }
+
+  next();
+};
 
 const checkDuplicate = (req, res, next) => {
   getUserByEmail(req.body.email)
@@ -91,4 +105,4 @@ const emailToken = (req, _res, next) => {
   });
 };
 
-module.exports = { checkDuplicate, checkToken, emailToken, validateRegisterUsers };
+module.exports = { checkDuplicate, checkToken, emailToken, registerInput, loginInput };
