@@ -187,13 +187,13 @@ const getProductImages = async (id) => {
 };
 
 const postProduct = async (body, image, id) => {
-  const { name, description, price, stock, categories_id, brands_id, colors_id } = body;
+  const { name, description, price, stock, stock_condition, categories_id, brands_id, colors_id } = body;
   try {
     let queryParams = [];
     let params = [];
-    const sqlQuery = "INSERT INTO products(name,description,price,stock,categories_id,users_id,brands_id,colors_id,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,now(),now()) returning id";
+    const sqlQuery = "INSERT INTO products(name,description,price,stock,categories_id,users_id,brands_id,colors_id,created_at,updated_at,stock_condition) VALUES($1,$2,$3,$4,$5,$6,$7,$8,now(),now(),$9)returning id";
 
-    const product = await db.query(sqlQuery, [name, description, price, stock, categories_id, id, brands_id, colors_id]);
+    const product = await db.query(sqlQuery, [name, description, price, stock, categories_id, id, brands_id, colors_id, stock_condition]);
 
     const product_id = product.rows[0].id;
 
