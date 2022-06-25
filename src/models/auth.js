@@ -39,8 +39,8 @@ const getPassByUserEmail = async (email) => {
     }
     return result.rows[0];
   } catch (error) {
-    const { status = 500, err } = error;
-    throw new ErrorHandler({ status, message: err });
+    const { status = 500, message } = error;
+    throw new ErrorHandler({ status, message });
   }
 };
 
