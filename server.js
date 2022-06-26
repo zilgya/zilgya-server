@@ -14,7 +14,7 @@ redisConn();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const originList = ["http://localhost:3000", "::1"];
+const originList = ["http://localhost:3000", , "https://zilgya-furniture.netlify.app", "::1"];
 
 const corsOption = {
   origin: (origin, callback) => {
