@@ -2,13 +2,13 @@ const { db } = require("../config/database");
 //const { param } = require("../routes/transactions");
 const { ErrorHandler } = require("../helpers/errorHandler");
 
-const createNewTransactions = async (body, u_id) => {
+const createNewTransactions = async (body, id) => {
     const { users_id, sub_total, shipping, tax, total_price, quantity, colors, brands, price, product_id } = body;
     try {
-        let userId = u_id;
+        let userId = id;
         let params = [];
         const created_at = new Date(Date.now());
-        if (!u_id) userId = users_id;
+        if (!id) userId = users_id;
         const client = await db.connect();
         //await client.query("BEGIN");
 
@@ -16,8 +16,8 @@ const createNewTransactions = async (body, u_id) => {
         const order = await client.query(queryOrder, [userId, sub_total, shipping, tax, total_price, created_at]);
         const orderId = order.rows[0].id;
 
-        let orderItemQuery = "INSERT INTO transaction_products(transaction_id, quantity, colors, brands, price, product_id) VALUES ($1,$2,$3,$4,$5,$6)";
-        params.push(orderId, quantity, colors, brands, price, product_id);
+        let orderItemQuery = "INSERT INTO transaction_products(transaction_id, quantity, product_id) VALUES ($1,$2,$3)";
+        params.push(orderId, quantity, product_id);
         //orderItemQuery += queryParams.join("");
         //orderItemQuery += " RETURNING *";
         const result = await client.query(orderItemQuery, params);

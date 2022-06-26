@@ -3,7 +3,7 @@ const { db } = require("./../config/database");
 
 const register = (email, hashedPassword, roles_id) => {
   return new Promise((resolve, reject) => {
-    const sqlQuery = "INSERT INTO users (email, password, roles_id, created_at) VALUES ($1, $2, $3, $4) returning *";
+    const sqlQuery = "INSERT INTO users (email, password, roles_id, created_at, username) VALUES ($1, $2, $3, $4, $1) returning *";
     const created_at = new Date(Date.now());
     const values = [email, hashedPassword, roles_id, created_at];
     db.query(sqlQuery, values)
@@ -39,9 +39,8 @@ const getPassByUserEmail = async (email) => {
     }
     return result.rows[0];
   } catch (error) {
-    // console.log(error)
-    const { status = 500, err } = error;
-    throw new ErrorHandler({ status, message: err });
+    const { status = 500, message } = error;
+    throw new ErrorHandler({ status, message });
   }
 };
 

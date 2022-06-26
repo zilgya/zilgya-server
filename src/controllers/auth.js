@@ -65,10 +65,10 @@ auth.signIn = async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptions);
     await client.set(`jwt${data.id}`, token);
     // return
-    successResponse(res, 200, { email, token, roles_id: data.roles_id }, null);
+    successResponse(res, 200, { id: data.id, email, token, roles_id: data.roles_id }, null);
   } catch (error) {
-    const { status = 500, err } = error;
-    errorResponse(res, status, err);
+    const { status = status ? status : 500, message } = error;
+    errorResponse(res, status, { msg: message });
   }
 };
 
