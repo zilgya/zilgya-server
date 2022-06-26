@@ -1,10 +1,11 @@
 const Router = require("express").Router();
-const userRouter = require('./user')
+const userRouter = require("./user");
 
 const authRouter = require("./auth");
 const transactionsRouter = require("./transactions");
 const productRoutes = require("./product");
 const promoRouter = require("./promo");
+const wishlistRouter = require("./wishlist");
 
 Router.get("/", (_req, res) => {
   res.json({
@@ -13,9 +14,10 @@ Router.get("/", (_req, res) => {
 });
 Router.use("/auth", authRouter);
 Router.use("/user", userRouter);
-Router.use("/product",productRoutes);
+Router.use("/product", productRoutes);
 Router.use("/transactions", transactionsRouter);
 Router.use("/promo", promoRouter);
+Router.use("/wishlist", wishlistRouter);
 Router.get("*", (_req, res) => {
   res.status(404).json({
     message: "Page Not Found",
