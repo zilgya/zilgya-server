@@ -41,6 +41,7 @@ const loginInput = (req, res, next) => {
       msg: "Email cannot be empty !",
     });
   }
+  
   for (const key in req.body) {
     if (key === "email") {
       if (!req.body[key].match(emailFormat)) {
