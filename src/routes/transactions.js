@@ -8,7 +8,6 @@ const { checkToken } = require("../middlewares/auth");
 Router.post("/", checkToken, transactionsControllers.postNewTransactions);
 Router.get("/users", checkToken, transactionsControllers.getAllTransactionsUser);
 Router.get("/seller", checkToken, transactionsControllers.getAllTransactionsSeller);
-Router.patch("/:id", checkToken, transactionsControllers.patchUpdateTransactions);
 Router.patch("/checkout", checkToken, transactionsControllers.checkoutProduct);
 Router.delete("/delete/:id", checkToken, transactionsControllers.deleteTransactionsbyId);
 
