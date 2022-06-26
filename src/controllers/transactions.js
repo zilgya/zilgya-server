@@ -1,5 +1,5 @@
 const transactionsModel = require("../models/transactions");
-const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfromSeller, updateTransactions, deleteDataTransactionsfromServer } = transactionsModel;
+const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfromSeller, updateTransactions, deleteDataTransactionsfromServer, checkout } = transactionsModel;
 
 const postNewTransactions = async (req, res) => {
   try {
@@ -85,10 +85,31 @@ const deleteTransactionsbyId = (req, res) => {
     });
 };
 
+const checkoutProduct = (req, res) => {
+  const users_id = req.userPayload.id;
+  checkout(req, users_id)
+    .then(({ data, msg }) => {
+      res.status(200).json({
+        data,
+        msg,
+        err: null,
+      });
+    })
+    .catch((error) => {
+      console.log(error)
+      const { err, status } = error;
+      res.status(status).json({
+        data: [],
+        err,
+      });
+    });
+};
+
 module.exports = {
   postNewTransactions,
   getAllTransactionsUser,
   getAllTransactionsSeller,
   patchUpdateTransactions,
   deleteTransactionsbyId,
+  checkoutProduct
 };
