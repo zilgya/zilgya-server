@@ -27,7 +27,7 @@ const createNewTransactions = async (body, id) => {
         queryParams.pop();
         orderItemQuery += queryParams.join("");
         orderItemQuery += " RETURNING *";
-        console.log(orderItemQuery);
+        //console.log(orderItemQuery);
         const result = await client.query(orderItemQuery, params);
         //await client.query("COMMIT");
         return { data: result.rows[0], message: "Transaction Successfully Created" };
@@ -114,10 +114,30 @@ const deleteDataTransactionsfromServer = (params) => {
     })
 }
 
+const checkout = (req) => {
+    return new Promise((resolve, reject) => {
+        // const { id } = req.params; 
+        const users_id = req.userPayload.id;
+        const { phone_number, payment_method, product_id } = req.body
+        const sqlQuery = "UPDATE transactions SET updated_at = now(), order_status = 'processed', phone_number=$1, payment_method=$2 where id=$3 and users_id = $4 returning *"
+        db.query(sqlQuery, [phone_number, payment_method, product_id, users_id])
+        .then((result) => {
+            resolve({
+                data: result.rows,
+                msg: null,
+            })
+        })
+        .catch((err) => {
+            reject(console.log(err));
+        })
+    })
+}
+
 module.exports = {
     createNewTransactions,
     getAllTransactionsfromUsers,
     getAllTransactionsfromSeller,
     updateTransactions,
-    deleteDataTransactionsfromServer
+    deleteDataTransactionsfromServer,
+    checkout
 }
