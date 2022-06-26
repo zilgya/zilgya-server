@@ -117,7 +117,7 @@ const sendPasswordConfirmation = async (name, email, confirmCode) => {
   </ul>
   YOUR RESET PASSWORD CONFIRMATION CODE is <h1>${confirmCode}</h1> <br>
   INPUT THIS CODE WHEN RESET YOUR PASSWORD !
-  <h2> <a href=${process.env.CLIENT_URL}/forgot-password/${email}> Click here to reset your password</a></h2>
+  <h2> <a href=${process.env.CLIENT_URL}/auth/forgot/${email}> Click here to reset your password</a></h2>
     </div>`;
 
     let mailOptions = {
