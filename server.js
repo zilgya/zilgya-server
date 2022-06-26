@@ -3,18 +3,16 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 
-const mainRouter = require("./src/routes/index.js");
-const { dbConn } = require("./src/config/database.js");
-const { redisConn } = require("./src/config/redis");
+const mainRouter = require("./routes/index.js");
+const { dbConn } = require("./config/database.js");
 
-const cloudinaryConfig = require("./src/middlewares/cloudinary");
+const cloudinaryConfig = require("./middlewares/cloudinary");
 
 dbConn();
-redisConn();
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
-const originList = ["http://localhost:3000", "::1", "https://zilgya-furniture.netlify.app"];
+const originList = ["http://localhost:3000", "::1"];
 
 const corsOption = {
   origin: (origin, callback) => {
