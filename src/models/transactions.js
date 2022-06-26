@@ -3,23 +3,31 @@ const { db } = require("../config/database");
 const { ErrorHandler } = require("../helpers/errorHandler");
 
 const createNewTransactions = async (body, id) => {
-    const { users_id, sub_total, shipping, tax, total_price, quantity, colors, brands, price, product_id } = body;
+    const { users_id, sub_total, shipping, total_price, product } = body;
     try {
         let userId = id;
         let params = [];
+        let queryParams = [];
         const created_at = new Date(Date.now());
         if (!id) userId = users_id;
         const client = await db.connect();
         //await client.query("BEGIN");
 
-        const queryOrder = "INSERT INTO transactions(users_id, sub_total, shipping, tax, total_price, created_at) VALUES($1,$2,$3,$4,$5,$6) RETURNING id";
-        const order = await client.query(queryOrder, [userId, sub_total, shipping, tax, total_price, created_at]);
+        const queryOrder = "INSERT INTO transactions(users_id, sub_total, shipping, total_price, created_at) VALUES($1,$2,$3,$4,$5) RETURNING id";
+        const order = await client.query(queryOrder, [userId, sub_total, shipping, total_price, created_at]);
         const orderId = order.rows[0].id;
 
-        let orderItemQuery = "INSERT INTO transaction_products(transaction_id, quantity, product_id) VALUES ($1,$2,$3)";
-        params.push(orderId, quantity, product_id);
-        //orderItemQuery += queryParams.join("");
-        //orderItemQuery += " RETURNING *";
+        let orderItemQuery = "INSERT INTO transaction_products(transaction_id, quantity, product_id) VALUES ";
+        // params.push(orderId, quantity, product_id);
+        product.map((val) => {
+            queryParams.push(`($${params.length + 1},$${params.length + 2},$${params.length + 3})`, ",");
+            params.push(orderId, val.quantity, val.id);
+
+        });
+        queryParams.pop();
+        orderItemQuery += queryParams.join("");
+        orderItemQuery += " RETURNING *";
+        console.log(orderItemQuery);
         const result = await client.query(orderItemQuery, params);
         //await client.query("COMMIT");
         return { data: result.rows[0], message: "Transaction Successfully Created" };
@@ -50,7 +58,7 @@ const getAllTransactionsfromUsers = (id) => {
 
 const getAllTransactionsfromSeller = (id) => {
     return new Promise((resolve, reject) => {
-        const sqlQuery = "select images.url, products.name as name_product, products.price, transaction_products.quantity, transactions.order_status, transactions.total_price from products join images on products.id  = images.product_id join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id where users.id = $1" ;
+        const sqlQuery = "select images.url, products.name as name_product, products.price, transaction_products.quantity, transactions.order_status, transactions.total_price from products join images on products.id  = images.product_id join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id where users.id = $1";
         db.query(sqlQuery, [id])
             .then((result) => {
                 //console.log(result)
