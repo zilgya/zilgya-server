@@ -99,9 +99,9 @@ const getMyProducts = (id, query, route) => {
     let totalParam = [id];
     let arr = [id];
     let totalQuery =
-      "select count(*) over() as total_products from products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id join images i on i.product_id = p.id where p.on_delete = false and p.users_id =$1";
+      "select count(*) over() as total_products, * from (SELECT distinct on(p.id) p.id,p.name, i.url as images_url, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id,p.created_at ,p.on_delete, p.updated_at  FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id join images i on i.product_id=p.id where p.on_delete = false and p.users_id = $1) as p";
     let sqlQuery =
-      "SELECT p.id,p.name, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id, i.url as images_url FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id join images i on i.product_id = p.id where p.on_delete = false and p.users_id =$1";
+      "SELECT * from (SELECT distinct on(p.id) p.id,p.name, i.url as images_url, p.description, p.price, p.stock, p.stock_condition, c.name as category, b.name as brand, c2.name as color, u.id as seller_id,p.created_at ,p.on_delete, p.updated_at  FROM products p join categories c on p.categories_id =c.id join users u on p.users_id = u.id join brands b on p.brands_id =b.id join colors c2 on p.colors_id =c2.id join images i on i.product_id=p.id where p.on_delete = false and p.users_id = $1) as p";
     if (!find && !categories) {
       sqlQuery += " order by p." + sort + " " + order + " LIMIT $2 OFFSET $3";
       arr.push(parseInt(limit), offset);
