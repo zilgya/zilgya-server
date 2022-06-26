@@ -3,7 +3,8 @@ const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfr
 
 const postNewTransactions = async (req, res) => {
   try {
-    const { data, message } = await createNewTransactions(req.body);
+    const { id } = req.userPayload
+    const { data, message } = await createNewTransactions(req.body, id);
 
     res.status(201).json({
       data,
