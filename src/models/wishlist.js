@@ -4,7 +4,7 @@ const { ErrorHandler } = require("../helpers/errorHandler");
 const readWishlist = async (user_id) => {
   try {
     let sqlQuery =
-      "SELECT p.id as product_id,p.users_id as user_id,p.name as name,p.description as description,p.price as price,p.stock as stock,p.stock_condition as stock_condition,i.url as image from wishlist w join products p on w.product_id=p.id join images i on p.id=i.product_id  where user_id = $1";
+      "SELECT distinct on(p.users_id)p.users_id,p.id as product_id,w.id,p.name as name,p.description as description,p.price as price,p.stock as stock,p.stock_condition as stock_condition,i.url as image from wishlist w join products p on w.product_id=p.id join images i on p.id=i.product_id  where user_id = $1";
     const result = await db.query(sqlQuery, [user_id]);
     if (!result.rowCount) throw new ErrorHandler({ status: 404, message: "Wishlist not Found" });
     return {
