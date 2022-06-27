@@ -1,12 +1,13 @@
-const { createWishlist, readWishlist, removeWishlist } = require("../models/wishlist");
+const { createWishlist, readWishlist, removeWishlist, readWishlistByIdProduct } = require("../models/wishlist");
 
 const getWishlist = async (req, res) => {
   try {
     const product_id = req.params.id;
     const user_id = req.userPayload.id;
-    const { data } = await readWishlist(user_id, product_id);
+    const { data, total } = await readWishlist(user_id, product_id);
     res.status(200).json({
       data,
+      total,
     });
   } catch (error) {
     const { status, message } = error;
@@ -15,6 +16,23 @@ const getWishlist = async (req, res) => {
     });
   }
 };
+const getWishlistByProductId = async(req,res)=>{
+  try {
+    const product_id= req.params.id;
+    const user_id = req.userPayload.id;
+    const { data, message } = await readWishlistByIdProduct(user_id, product_id);
+    res.status(200).json({
+      data,
+      message,
+    });
+  } catch (error) {
+    const { status, message } = error;
+    res.status(status ? status : 500).json({
+      error: message,
+    });
+  }
+};
+
 
 const postWishlist = async (req, res) => {
   try {
@@ -49,4 +67,4 @@ const deleteWishlist = async (req, res) => {
   }
 };
 
-module.exports = { getWishlist, postWishlist, deleteWishlist };
+module.exports = { getWishlist, getWishlistByProductId,postWishlist, deleteWishlist };
