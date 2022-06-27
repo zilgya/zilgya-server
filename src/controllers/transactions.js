@@ -1,5 +1,5 @@
 const transactionsModel = require("../models/transactions");
-const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfromSeller, deleteDataTransactionsfromServer, checkout } = transactionsModel;
+const { createNewTransactions, getAllTransactionsfromUsers, getAllTransactionsfromSeller, deleteDataTransactionsfromServer, checkout, getTransactions, completed } = transactionsModel;
 
 const postNewTransactions = async (req, res) => {
   try {
@@ -51,8 +51,8 @@ const getAllTransactionsSeller = (req, res) => {
 };
 
 const deleteTransactionsbyId = (req, res) => {
-  const id = req.params;
-  deleteDataTransactionsfromServer(id)
+  // const id = req.params;
+  deleteDataTransactionsfromServer(req)
     .then(({ data, msg }) => {
       res.status(200).json({
         data,
@@ -87,11 +87,39 @@ const checkoutProduct = (req, res) => {
       });
     });
 };
-
+const getTransactionsUsers = (req, res) => {
+  const id = req.userPayload.id;
+  getTransactions(id)
+    .then((data) => {
+      res.status(200).json({
+        data,
+      });
+    })
+    .catch(({ status, err }) => {
+      res.status(status).json({
+        err,
+      });
+    });
+};
+const patchCompleted = (req, res) => {
+  completed(req)
+    .then((data) => {
+      res.status(200).json({
+        data,
+      });
+    })
+    .catch(({ status, err }) => {
+      res.status(status).json({
+        err,
+      });
+    });
+};
 module.exports = {
   postNewTransactions,
   getAllTransactionsUser,
   getAllTransactionsSeller,
   deleteTransactionsbyId,
   checkoutProduct,
+  getTransactionsUsers,
+  patchCompleted,
 };

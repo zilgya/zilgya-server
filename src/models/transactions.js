@@ -44,7 +44,7 @@ const createNewTransactions = async (body, id) => {
 const getAllTransactionsfromUsers = (id) => {
   return new Promise((resolve, reject) => {
     const sqlQuery =
-      "select t.id,i.url, p.name as name,u.username as seller, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on p.users_id = u.id  where tp.transaction_id in(select id from transactions where users_id=$1)";
+      "select t.id,i.url, p.name as name,u.username as seller, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on p.users_id = u.id  where tp.transaction_id in(select id from transactions where users_id=$1 and on_delete = false)";
     db.query(sqlQuery, [id])
       .then((result) => {
         //console.log(result)
@@ -63,7 +63,7 @@ const getAllTransactionsfromUsers = (id) => {
 const getAllTransactionsfromSeller = (id) => {
   return new Promise((resolve, reject) => {
     const sqlQuery =
-      "select t.id,i.url, p.name as name,u.username as buyer, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on t.users_id = u.id where p.users_id = $1";
+      "select t.id,i.url, p.name as name,u.username as buyer, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on t.users_id = u.id where p.users_id = $1 and t.on_delete = false";
     db.query(sqlQuery, [id])
       .then((result) => {
         const response = {
@@ -77,9 +77,9 @@ const getAllTransactionsfromSeller = (id) => {
   });
 };
 
-const deleteDataTransactionsfromServer = (params) => {
+const deleteDataTransactionsfromServer = (req) => {
   return new Promise((resolve, reject) => {
-    const { id } = params;
+    const { id } = req.params;
     // const updated_at = new Date(Date.now());
     const sqlQuery = "UPDATE transactions SET updated_at = now(), on_delete=true WHERE id = $1 RETURNING *";
     db.query(sqlQuery, [id])
@@ -101,22 +101,60 @@ const deleteDataTransactionsfromServer = (params) => {
 
 const checkout = (req) => {
   return new Promise((resolve, reject) => {
-    // const { id } = req.params;
+    // const { id } = req.params; 
     const users_id = req.userPayload.id;
     const { phone_number, payment_method, order_id } = req.body;
-    const sqlQuery = "UPDATE transactions SET updated_at = now(), order_status = 'PROCESSED', phone_number=$1, payment_method=$2 where id=$3 and users_id = $4 returning *";
+    const sqlQuery = "UPDATE transactions SET updated_at = now(), order_status = 'SENT', phone_number=$1, payment_method=$2 where id=$3 and users_id = $4 returning *";
     db.query(sqlQuery, [phone_number, payment_method, order_id, users_id])
       .then((result) => {
         resolve({
           data: result.rows,
           msg: null,
-        });
+        })
       })
       .catch((err) => {
         reject(console.log(err));
-      });
-  });
-};
+      })
+  })
+}
+const getTransactions = (id) => {
+  return new Promise((resolve, reject) => {
+    // const { id } = req.params; 
+    //const { transactions_id } = req.body
+    const sqlQuery = "select transactions.id, users.username, products.name from products join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id where users.id = $1 and transactions.order_status = 'NOT PAID'"
+    db.query(sqlQuery, [id])
+      .then((result) => {
+        //console.log(result)
+        const response = {
+          total: result.rowCount,
+          data: result.rows,
+        };
+        resolve(response);
+      })
+      .catch((err) => {
+        reject({ status: 500, err });
+      })
+  })
+}
+const completed = (req) => {
+  return new Promise((resolve, reject) => {
+    const { id } = req.params;
+    // const users_id = req.userPayload.id;
+    // const { order_id } = req.body;
+    const sqlQuery = "UPDATE transactions SET updated_at = now(), order_status = 'COMPLETED' where id=$1 returning *";
+    db.query(sqlQuery, [id])
+      .then((result) => {
+        resolve({
+          data: result.rows,
+          msg: null,
+        })
+      })
+      .catch((err) => {
+        reject(console.log(err));
+      })
+  })
+}
+
 
 module.exports = {
   createNewTransactions,
@@ -124,4 +162,6 @@ module.exports = {
   getAllTransactionsfromSeller,
   deleteDataTransactionsfromServer,
   checkout,
-};
+  getTransactions,
+  completed
+}
