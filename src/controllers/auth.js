@@ -103,7 +103,7 @@ auth.confirmEmail = async (req, res) => {
 
 auth.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email } = req.params;
     const confirmCode = generator.generate({
       length: 7,
       numbers: true,

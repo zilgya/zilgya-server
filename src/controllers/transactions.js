@@ -12,7 +12,7 @@ const postNewTransactions = async (req, res) => {
     });
   } catch (err) {
     const { message, status } = err;
-    res.status(status).json({
+    res.status(status ? status : 500).json({
       error: message,
     });
   }

@@ -3,22 +3,28 @@ const { db } = require("../config/database");
 const { ErrorHandler } = require("../helpers/errorHandler");
 
 const createNewTransactions = async (body, id) => {
-  const { users_id, sub_total, shipping, total_price, product } = body;
+  const { users_id, sub_total, shipping, total_price, product, promo_id } = body;
   try {
     let userId = id;
+    let orderId;
     let params = [];
     let queryParams = [];
-    const created_at = new Date(Date.now());
-    if (!id) userId = users_id;
-    const client = await db.connect();
-    //await client.query("BEGIN");
 
-    const queryOrder = "INSERT INTO transactions(users_id, sub_total, shipping, total_price, created_at) VALUES($1,$2,$3,$4,$5) RETURNING id";
-    const order = await client.query(queryOrder, [userId, sub_total, shipping, total_price, created_at]);
-    const orderId = order.rows[0].id;
+    const created_at = new Date(Date.now());
+
+    if (!id) userId = users_id;
+    let queryOrderParams = [userId, sub_total, shipping, total_price, created_at];
+
+    let queryOrder = "INSERT INTO transactions(users_id, sub_total, shipping, total_price, created_at) VALUES($1,$2,$3,$4,$5) RETURNING id";
+    if (promo_id) {
+      queryOrder = "with t as (INSERT INTO transactions(users_id, sub_total, shipping, total_price, created_at,promo_id) VALUES($1,$2,$3,$4,$5,$6) returning id),pr as (UPDATE promos set on_delete=true where id = $6) select t.id from t";
+      queryOrderParams.push(promo_id);
+    }
+    const order = await db.query(queryOrder, queryOrderParams);
+    orderId = order.rows[0].id;
 
     let orderItemQuery = "INSERT INTO transaction_products(transaction_id, quantity, product_id) VALUES ";
-    // params.push(orderId, quantity, product_id);
+
     product.map((val) => {
       queryParams.push(`($${params.length + 1},$${params.length + 2},$${params.length + 3})`, ",");
       params.push(orderId, val.quantity, val.id);
@@ -26,13 +32,11 @@ const createNewTransactions = async (body, id) => {
     queryParams.pop();
     orderItemQuery += queryParams.join("");
     orderItemQuery += " RETURNING *";
-    //console.log(orderItemQuery);
-    const result = await client.query(orderItemQuery, params);
-    //await client.query("COMMIT");
+
+    const result = await db.query(orderItemQuery, params);
+
     return { data: result.rows[0], message: "Transaction Successfully Created" };
   } catch (err) {
-    const client = await db.connect();
-    //await client.query("ROLLBACK");
     throw new ErrorHandler({ status: err.status ? err.status : 500, message: err.message });
   }
 };
