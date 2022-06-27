@@ -132,6 +132,26 @@ const checkout = (req) => {
         })
     })
 }
+const getTransactions = (id) => {
+    return new Promise((resolve, reject) => {
+        // const { id } = req.params; 
+        //const { transactions_id } = req.body
+        const sqlQuery = "select transactions.id, users.username, products.name from products join transaction_products on products.id = transaction_products.product_id join transactions on transaction_products.transaction_id = transactions.id join users on transactions.users_id = users.id where users.id = $1"
+        db.query(sqlQuery, [id])
+        .then((result) => {
+            //console.log(result)
+            const response = {
+                total: result.rowCount,
+                data: result.rows,
+            };
+            resolve(response);
+        })
+        .catch((err) => {
+            reject({ status: 500, err });
+        })
+    })
+}
+
 
 module.exports = {
     createNewTransactions,
@@ -139,5 +159,6 @@ module.exports = {
     getAllTransactionsfromSeller,
     updateTransactions,
     deleteDataTransactionsfromServer,
-    checkout
+    checkout,
+    getTransactions
 }
