@@ -12,7 +12,7 @@ const postNewTransactions = async (req, res) => {
     });
   } catch (err) {
     const { message, status } = err;
-    res.status(status).json({
+    res.status(status ? status : 500).json({
       error: message,
     });
   }
@@ -51,8 +51,8 @@ const getAllTransactionsSeller = (req, res) => {
 };
 
 const deleteTransactionsbyId = (req, res) => {
-  const id = req.params;
-  deleteDataTransactionsfromServer(id)
+  // const id = req.params;
+  deleteDataTransactionsfromServer(req)
     .then(({ data, msg }) => {
       res.status(200).json({
         data,

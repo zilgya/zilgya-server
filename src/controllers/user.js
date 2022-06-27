@@ -41,6 +41,9 @@ const patchUserPassword = async (req, res) => {
       return;
     }
     const { message } = await updateUserPassword(newPassword, email);
+    if (message) {
+      await client.del(`forgotpass${email}`);
+    }
     res.status(200).json({
       message,
     });
