@@ -40,7 +40,7 @@ const createNewTransactions = async (body, id) => {
 const getAllTransactionsfromUsers = (id) => {
   return new Promise((resolve, reject) => {
     const sqlQuery =
-      "select t.id,i.url, p.name as name_product,u.username as seller, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on p.users_id = u.id  where tp.transaction_id in(select id from transactions where users_id=$1)";
+      "select t.id,i.url, p.name as name,u.username as seller, p.price, tp.quantity, t.order_status, t.total_price from transaction_products tp join transactions t on tp.transaction_id  = t.id join products p  on p.id = tp.product_id join images i on p.id = i.product_id join users u on p.users_id = u.id  where tp.transaction_id in(select id from transactions where users_id=$1)";
     db.query(sqlQuery, [id])
       .then((result) => {
         //console.log(result)
