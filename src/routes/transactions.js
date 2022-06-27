@@ -9,8 +9,8 @@ Router.post("/", checkToken, transactionsControllers.postNewTransactions);
 Router.get("/users", checkToken, transactionsControllers.getAllTransactionsUser);
 Router.get("/seller", checkToken, transactionsControllers.getAllTransactionsSeller);
 Router.get("/checkout/users", checkToken, transactionsControllers.getTransactionsUsers);
-Router.patch("/:id", checkToken, transactionsControllers.patchUpdateTransactions);
 Router.patch("/checkout", checkToken, transactionsControllers.checkoutProduct);
+Router.patch("/completed/:id", checkToken, transactionsControllers.patchCompleted);
 Router.delete("/delete/:id", checkToken, transactionsControllers.deleteTransactionsbyId);
 
 module.exports = Router;
