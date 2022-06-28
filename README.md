@@ -82,7 +82,7 @@ CLOUDINARY_URL=cloudinary://594784199875728:zbw3276bmERbaFGdhtOd5F0fBFs@zilgya-p
 $ npm run startDev
 ```
 
-6. Juncoffee Server App is Running
+6. ZILGYA Server App is Running
 
 ### Related Project
 

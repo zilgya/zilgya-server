@@ -15,13 +15,11 @@ const db = new Pool({
 });
 
 const dbConn = async () => {
-  const client = await db.connect();
   try {
+    await db.connect();
     console.log("DB connected");
   } catch (err) {
     console.log(`Error: ${err.message}`);
-  } finally {
-    client.release();
   }
 };
 

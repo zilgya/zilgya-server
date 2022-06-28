@@ -17,10 +17,10 @@ const sendConfirmationEmail = async (name, email, confirmationCode) => {
       from: process.env.MAIL_USERNAME,
       to: email,
       subject: "Please confirm your Account",
-      html: `<h2>Zilgya Furniture Email Confirmation</h2>
+      html: `<h2>Juncoffee Email Confirmation</h2>
       <h3>Hi, ${name}</h3>
-      <h3>Thank you for register. Please confirm your email by clicking on the following link :</h3>
-      <a href=${process.env.CLIENT_URL}/auth/confirm/${confirmationCode}> Click here to verify </a>
+      <h3>Thank you for register. Please confirm your email by clicking on the following link:</h3>
+      <a href=${process.env.CLIENT_URL}/auth/confirm/${confirmationCode}> Click here to verify</a>
       </div>`,
     };
     await transport.sendMail(mailOptions);
@@ -64,9 +64,9 @@ const sendConfirmationPayment = async (name, email, items, totalPrice, payMethod
   <h2> <a href=${process.env.CLIENT_URL}/auth/payment/${token}> Click here to confirm your payment</a></h2>
     </div>`;
     if (payMethod === "cash on delivery") {
-      html = `<h2>Zilgya Furniture Payment Confirmation</h2>
+      html = `<h2>Juncoffee Payment Confirmation</h2>
       <h3>Hi, ${name}</h3>
-      <h3>Thank you for shopping at Zilgya Furniture. here is your transaction details:</h3>
+      <h3>Thank you for shopping at Juncoffee. here is your transaction details:</h3>
       ${items.map((val) => {
         return `<ul><h3>${val.name}</h3> 
         <img src=${val.image}/>
@@ -95,7 +95,7 @@ const sendConfirmationPayment = async (name, email, items, totalPrice, payMethod
   }
 };
 
-const sendPasswordConfirmation = async (name, email, confirmCode) => {
+const sendPasswordConfirmation = async (name, email) => {
   try {
     const transport = nodemailer.createTransport({
       service: "gmail",
@@ -108,7 +108,7 @@ const sendPasswordConfirmation = async (name, email, confirmCode) => {
         refreshToken: process.env.OAUTH_REFRESH_TOKEN,
       },
     });
-    let html = `<h2>Zilgya Furniture Forgot Password Confirmation</h2>
+    let html = `<h2>Juncoffee Forgot Password Confirmation</h2>
     <h3>Hi, ${name}</h3>
     <h3>Here is your account details:</h3>
     <ul>
